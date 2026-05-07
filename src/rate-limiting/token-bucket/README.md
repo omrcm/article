@@ -17,11 +17,9 @@ Rate limiting için en yaygın kullanılan algoritmalardan biri olan Token Bucke
 
 ```
 token-bucket/
-├── TokenBucket.sln
-├── src/
-│   └── TokenBucket/           # Implementasyon
-└── tests/
-    └── TokenBucket.Tests/     # Unit testler
+    TokenBucket.sln
+    src/
+        TokenBucket/
 ```
 
 ## Çalıştırma
