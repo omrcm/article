@@ -2,7 +2,7 @@
 
 Rate limiting için en yaygın kullanılan algoritmalardan biri olan Token Bucket'ın .NET ile farklı implementasyon varyantları.
 
-> Eşlik eden makale: _eklenecek_
+> Konu ile ilgili makaleye buradan [ulaşabilirsiniz](https://medium.com/@omurucum/token-bucket-net-ile-rate-limitingin-temel-algoritmas%C4%B1-cd66db171bde)
 
 ## İçerik
 
