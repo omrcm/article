@@ -1,6 +1,6 @@
 # Article
 
-Bir mimarın bilmesi gereken algoritmaların .NET ile implementasyonları ve eşlik eden makaleler.
+Medium sayfamda yayınladığım makalelere ait örnek kodların bulunduğu repodur.
 
 Her klasör bir makaleye karşılık gelir; içinde çalıştırılabilir örnek kod, testler ve makalenin bağlantısı bulunur.
 
@@ -18,11 +18,11 @@ article/
 
 | Kategori | Algoritma | Klasör | Makale |
 | --- | --- | --- | --- |
-| Rate Limiting | Token Bucket | [src/rate-limiting/token-bucket](./src/rate-limiting/token-bucket) |  |
+| Rate Limiting | Token Bucket | [src/rate-limiting/token-bucket](./src/rate-limiting/token-bucket) | [rate-limiting/token-bucket] (https://medium.com/@omurucum/token-bucket-net-ile-rate-limitingin-temel-algoritmas%C4%B1-cd66db171bde) |
 
 ## Gereksinimler
 
-- .NET 8 SDK veya üzeri
+- Merak
 
 ## Çalıştırma
 
