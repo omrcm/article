@@ -86,7 +86,7 @@ class Program
     // (Gerçek hayatta: DB sorgusu, HTTP çağrısı, dosya I/O, vs.)
     static async Task<string> FakeAsyncWork(int id)
     {
-        await Task.Delay(250);
+        await Task.Delay(200);
         return $"Result-{id}";
     }
 }
