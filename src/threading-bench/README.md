@@ -1,6 +1,6 @@
-# Threading Bench — Local Setup (Mac M-Series)
+# Threading Bench
 
-Mac M-serisi makinende Docker Compose ile **API + k6 + Prometheus + Grafana** stack'i.
+Mac M-serisi makinende Docker Compose ile **API + k6 + Prometheus + Grafana** stack'i. Local ortamda yapılan bu sistemin GCP tarafına transferi ve ayağa kaldırılması burada anlatılmamıştır.
 
 ## Önkoşullar
 
@@ -8,7 +8,7 @@ Mac M-serisi makinende Docker Compose ile **API + k6 + Prometheus + Grafana** st
 - 8 GB RAM (önerilen: 16 GB)
 - 5 GB disk alanı
 
-## Hızlı Başlangıç (5 dakika)
+## Hızlı Başlangıç
 
 ### 1. Stack'i Ayağa Kaldır
 
@@ -150,7 +150,7 @@ Eksik kaynak verilirse:
 
 ### ARM64 Native Çalışma
 
-Tüm imajlar (.NET 8, k6, Prometheus, Grafana) ARM64 native destekler. Rosetta emulation kullanmaz, full performans alırsın.
+Tüm imajlar (.NET 8, k6, Prometheus, Grafana) ARM64 native destekler.
 
 ### Performans Beklentisi
 
