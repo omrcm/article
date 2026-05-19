@@ -1,0 +1,40 @@
+# .NET build artifacts
+**/bin/
+**/obj/
+**/out/
+**/publish/
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documents
+*.md
+docs/
+
+# Local Docker compose
+docker-compose.override.yml
+
+# Logs
+*.log
+logs/
+
+# Test results
+results/
+TestResults/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local

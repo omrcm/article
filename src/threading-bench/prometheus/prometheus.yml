@@ -1,0 +1,15 @@
+global:
+  scrape_interval: 5s        # Her 5 saniyede bir scrape
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: 'threading-api'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['api:5000']
+        labels:
+          service: 'api'
+
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
