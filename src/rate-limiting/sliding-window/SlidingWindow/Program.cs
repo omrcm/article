@@ -1,20 +1,3 @@
-// -----------------------------------------------------------------------------
-// Sınır Sızıntısı (Boundary Leak) Demo
-// Rate Limiting Serisi - Sliding Wİndow
-//
-// Amaç: Fixed Window'un pencere sınırında nasıl sızdırdığını, Sliding Window'un
-// bunu nasıl kapattığını ve Log ile Counter arasındaki approximation farkını
-// dış bir bağımlılık olmadan, deterministik bir simülasyonla göstermek.
-//
-// Bu KASITLI olarak saf bir in-memory simülasyondur: HTTP yok, ASP.NET yok,
-// Redis yok. Framework'ün SlidingWindowLimiter'ı ve dağıtık senaryo Parça 2'ye,
-// gerçek yük ölçümü Parça 3'e aittir.
-//
-// Çalıştırmak için:
-//   dotnet new console -n SinirSizintisi
-//   (Program.cs içeriğini bununla değiştir)
-//   dotnet run
-// -----------------------------------------------------------------------------
 
 const int Limit = 100;        // 60 saniyelik aralıkta en fazla 100 istek
 const double Window = 60.0;   // pencere genişliği (saniye)
@@ -54,7 +37,6 @@ static int Accepted(IRateLimiter limiter, double[] requests)
 
 interface IRateLimiter
 {
-    // t: isteğin geldiği an
     bool TryAcquire(double t);
 }
 
