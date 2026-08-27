@@ -1,0 +1,73 @@
+# Geliştiriciye Sorulacak Sorular
+
+*25 Ağustos 2026 · Tümü kod ve doküman incelemesine dayanır; her sorunun altında neden önemli olduğu ve hangi cevabın tatmin edici sayılacağı var. Sıra öneme göredir.*
+
+---
+
+## A · Keycloak / kimlik tarafı — "bu iş neden burada?"
+
+**S-1. Kurumda aktif bir Keycloak varken PAR, PKCE, authorization code ve token ucu neden `identity-security-service` içine sıfırdan yazıldı (`AuthorizationController`)? Bu bir "PoC'de dış bağımlılık istemedik" kararı mı, yoksa hedef mimaride de böyle mi düşünülüyor?**
+Neden önemli: Bu yüzeyin commodity kısmı Keycloak'ın işi; kalıcı niyetse bakım/yama/FAPI-uyum yükü ekibe kalır. "Demo bağımsız koşsun diye" cevabı kabul edilebilir — o zaman üretim yol haritasında bu yüzeyin kaderi netleşmeli.
+
+**S-2. `/oauth/token` ucu `"at-"+UUID` üretiyor, bu değer `AccessToken` tablosuna yazılmıyor ve introspection'dan geçmiyor (B-1). Bu uç hiç uçtan uca test edildi mi, yoksa yalnız vitrin mi? Gerçek akışın `/erisim-belirteci` yolu olduğu doğru mu?**
+Neden önemli: İki belirteç üretim yolundan biri kopuksa, FAPI akışını gösteren demo iddiası ile çalışan kod ayrışıyor. "Vitrin, bilinçli" cevabı bile yazılı işaretlenmeli (README'nin Dürüst Sınırlar bölümü bundan söz etmiyor).
+
+**S-3. SCA'da müşteri kimliği doğrulanmadan parametreyle alınıyor (`ScaController.approve?customer_id=...`, GKD ekranında varsayılan `musteri=Ayse Yilmaz`). Üretimde bu adımın kurumdaki Keycloak'a (veya bankanın kanal IdP'sine) OIDC ile devri mi öngörülüyor? Öyleyse `acr/amr` kanıtının deftere yazılması düşünüldü mü?**
+Neden önemli: "Dış taraf kimlik bilgisini görmez" garantisi bugün yapıyla korunuyor ama kimliğin kendisi doğrulanmıyor; hedef entegrasyon noktası netleşmeli.
+
+**S-4. Party Registry ile Keycloak client kaydı arasındaki çizgi nasıl düşünüldü? TPP onboarding'i ileride Keycloak'a taşınırsa sertifika kökü / kanal / hız limiti / redirect_uri hangi tarafta kalacak?**
+Neden önemli: İki kayıt sistemi ayrışırsa (redirect_uri bir yerde güncellenip diğerinde kalırsa) güvenlik kontrolü sessizce zayıflar.
+
+**S-5. `identity-security-service`'e ileride müşteri dizini, şifre, OTP, cihaz kaydı gibi bir yetenek ekleme planı var mı?**
+Neden önemli: Beklenen cevap kesin "hayır" — o boşluk Keycloak'ındır. "Belki" cevabı, rol ayrımının ekipte netleşmediğinin işaretidir.
+
+## B · Belirteç yaşam döngüsü ve iptal
+
+**S-6. Belirteç üretimi çekirdekten identity'ye taşındıktan sonra çekirdekte kalan paralel yol (`ConsentService.issueToken`/`refreshToken`, `ConsentController /tokens/refresh`) neden silinmedi (B-2)? Bilinçli bir geri dönüş planı mı, temizlenmemiş kalıntı mı?**
+Neden önemli: İki refresh implementasyonu ve iki token tablosu drift riski; hangisinin doğruluk kaynağı olduğu koddan okunamıyor.
+
+**S-7. İptal çağlayanı identity tarafında yalnız Kafka olayına bağlı (`ConsentRevocationWorker`); Kafka yayını da "ölümcül değil" — WARN ile yutuluyor. Kafka kesintisinde iptal edilmiş rızanın belirteci 15 dakikaya kadar yaşıyor. Bu pencere bilinçli kabul mü, ölçüldü mü? Outbox veya senkron+olay mutabakatı değerlendirildi mi?**
+Neden önemli: Düzenleyici "iptal anında erişim kesilir" sorusunu sorarsa cevap bugün "en fazla 15 dk + Kafka ayakta ise anında" — bu kabulün yazılı olması gerekir.
+
+**S-8. AS imzalama anahtarı her açılışta üretiliyor (B-3); restart tüm canlı JWT'leri geçersiz kılar ve JWKS değişir. Üretim için hedef ne — HSM, Vault, yoksa anahtarı kalıcılaştırıp rotasyon mu? `kid` geçişi (eski+yeni anahtarın JWKS'te birlikte yayını) düşünüldü mü?**
+
+**S-9. Olay şemasında alan adı `consentId` ama içinde rıza referansı taşınıyor; worker bu yüzden bir süre sessizce hiç çalışmamış (kod yorumunda itiraf ediliyor). Olay şemaları için versiyonlama/sözleşme testi (consumer contract test) planı var mı?**
+
+## C · Rıza yaşam döngüsü
+
+**S-10. "Rıza değiştirme" bilinçli olarak yok (iptal + yeniden kur). Spesifikasyondaki 01 (yeni rıza ile değiştirme) ve 15 (hesap rızası güncelleme) kodları tabloda tanımlı ama bunları kullanan uçtan uca akış yok. AIS tekillik kuralı yüzünden "önce iptal, sonra yeni" sırasında müşteri rızasız kalıyor — atomik bir değiştirme ucu (yeni rızayı aç + eskisini 01/15 ile kapat + iki kaydı bağla) neden kapsam dışı bırakıldı?**
+Neden önemli: Gerçek YÖS'ler bu akışı isteyecek; çağırana bırakmak yarış koşulu ve denetim izinde kopukluk üretir.
+
+**S-11. `SecurityGuardFilter`'da token-optional kuralı "path listesi VEYA method==DELETE". Her DELETE'i sertifika-only yapmak bilinçli mi? İleride eklenecek bir DELETE ucu istemeden token'sız kalmaz mı (B-6)?**
+
+**S-12. Tek kullanımlık rıza kavramı ile ÖHVPS'in beklentileri nasıl hizalandı? Örneğin anlık ödemede rıza `TERMINATED` olduktan sonra durum sorgularının sertifika-only çalışması hangi spesifikasyon maddesine dayandırıldı?**
+Neden önemli: Doğru görünen bir tasarım ama sertifikasyon denetiminde "dayanak nedir" sorusu gelecek; cevabın yazılı olması gerek.
+
+**S-13. `requireOperable` içindeki kontrol sırası (durum → süre → kapsam → hesap → tutar → kalan kullanım) ve her birinin ayrı hata kodu — bu sıralama spesifikasyondan mı türetildi, yoksa pratik mi? Hata kodlarının ÖHVPS `hataYaniti` eşlemesi birebir test ediliyor mu?**
+
+## D · Güvenlik ve ölçek
+
+**S-14. PDP her istekte `partyRepository.findAll().stream()` ile sertifika subject'i arıyor (B-4). Taraf sayısı yüzlere çıktığında bu tasarım nasıl ölçeklenecek — indeksli sorgu + önbellek planı var mı? Önbellek varsa taraf pasifleştirme ne kadar gecikmeli etki eder?**
+
+**S-15. mTLS simülasyonunda `X-Client-Cert-*` başlıklarını üretimde kim dolduracak — kurumsal API GW mi, LB mi? O bileşen bu başlıkları dışarıdan gelen kopyalarına karşı süzecek mi (bugün edge yalnız `X-Canonical-*`'ı eziyor, cert başlıklarını değil)?**
+Neden önemli: Üretim geçişinin en kritik tek noktası; başlık süzme sorumluluğu sahipsiz kalırsa kimlik sahteciliği kapısı açılır.
+
+**S-16. JWT `Authorization` başlığında dolaşıyor; GW/proxy/APM loglarında maskeleme standardı tanımlı mı? (GAP-11 ile TCKN belirteçten çıkarıldı ama belirteç kendisi hâlâ yetki taşıyor.)**
+
+**S-17. Redis'teki hız sınırı ve Party Registry'deki limit değeri: taraf başına limit değişince yayılma süresi ne? Redis kesintisinde davranış fail-open mı fail-closed mı?**
+
+## E · Üretim yolu ve kapsam
+
+**S-18. PoC'den üretime giderken hangi parçalar "aynen taşınır", hangileri "yeniden yazılır" olarak sınıflandı? (Özellikle: GKD ekranı, mock-bank sınırındaki beş entegrasyon noktası, Vault/Doris'in bilinçli dışarıda bırakılması.)**
+
+**S-19. HHS-YÖS ve Olay Bildirim API'leri "sonradan tamamlandı" notuyla geçiyor; abonelik bazlı webhook filtresi ne kadar gerçek? DLT'yi boşaltan iş kapsam dışı bırakılmış — üretimde webhook teslim garantisi kimin sorumluluğu?**
+
+**S-20. ArchUnit kapıları (çekirdek standart bilmez, HTTP istemcisi yok, orkestrasyon kural tutmaz) CI'da zorunlu mu, yoksa yalnız yerel `mvnw test` ile mi korunuyor? Kapıyı bilerek kıran PR'ı ne durduruyor?**
+
+**S-21. Denetim defterinde hash zinciri yazımları zincir ucunda sıralanıyor (bilinçli verim ödünü). Beklenen üretim TPS'inde bu sıralama darboğaz olur mu — ölçüldü mü? Bölümleme (örn. gün bazlı zincir) düşünüldü mü?**
+
+---
+
+### Görüşme için kısa not
+
+En kritik beş soru: **S-1, S-2, S-7, S-10, S-15.** Bunların cevabı "bilinçliydi ve şurada yazılı" ise proje çok iyi durumda demektir — kodun genel kalitesi ve doküman dürüstlüğü (GAP-ANALYSIS'in varlığı, kapatılan GAP-11) bu ihtimali destekliyor. Cevap "hiç düşünmedik" ise ilgili madde `tavsiyeler/` klasöründeki raporlarda zaten yol haritasıyla birlikte duruyor: fazlalıklar için `fazlaliklar-cikarma-listesi.md`, rol ayrımı için `keycloak-rol-ayrimi-ek-not.md`, bulgular için `riza-analizi-ve-tavsiyeler.md` §6.
