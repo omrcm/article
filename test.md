@@ -1,7 +1,5 @@
 # Rıza Kapsamlı Soru Listesi — Geliştiriciye Sorulacaklar ve Beklenen Cevaplar
 
-*7 Eylül 2026 · Kapsam: yalnızca rıza alanı — rızanın modeli, yaşam döngüsü, sahipliği, değişimi, politika ve denetim izi, müşteri yüzü. Yetkilendirme sunucusu, gateway, Keycloak altyapısı, servisler arası kimlik ve operasyon konuları bilinçli olarak dışarıda bırakıldı; onlar `gelistirici-soru-listesi.md` ve `keycloak-baglaminda-yeni-bulgular-ve-sorular.md` içinde duruyor. Kullanım hedefi: ÖHVPS + servis modeli bankacılığında üçüncü parti API'ler için `consent-core`'un yeniden kullanımı.*
-
 ---
 
 ## 0 · Elenen sorular ve gerekçesi
